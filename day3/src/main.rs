@@ -44,22 +44,6 @@ fn part_2(input: &str) -> u32 {
     total
 }
 
-fn number_adjacent_parts(gear: &Pos, parts: &[Part]) -> u32 {
-    let neighbours = gear.get_neighbours();
-    let mut count = 0;
-    neighbours.iter().for_each(|a| {
-        // todo
-        parts.iter().for_each(|b| {
-            if a.x == b.start.x && a.y == b.start.y {
-                count += 1;
-            }
-        })
-    });
-
-    println!("matching: {}", count);
-    count
-}
-
 fn find_parts(input: &str) -> Vec<Part> {
     let mut parts = Vec::new();
     input.lines().enumerate().for_each(|(j, line)| {
