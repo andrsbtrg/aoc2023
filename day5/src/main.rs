@@ -2,8 +2,44 @@ use std::{collections::HashMap, fs};
 
 fn main() {
     let input = fs::read_to_string("input.txt").expect("Missing input.txt");
-    let lowest = part_1(&input);
+    let lowest = part_2(&input);
     println!("lowest location: {}", lowest)
+}
+
+fn part_2(input: &str) -> i64 {
+    let mut iter = input.lines().into_iter();
+    let (_, seeds) = iter.next().unwrap().split_once(": ").unwrap();
+
+    let seeds: Vec<i64> = seeds
+        .split_whitespace()
+        .map(|s| s.parse().unwrap())
+        .collect();
+
+    let seeds: Vec<_> = seeds
+        .chunks(2)
+        .map(|chunk| {
+            if let [start, len] = chunk {
+                let range = *start..*start + *len;
+                range
+            } else {
+                panic!()
+            }
+        })
+        .collect();
+
+    println!("len: {:?}", seeds);
+    let map = create_map(input);
+    let results = seeds
+        .iter()
+        .map(|seed| {
+            //
+            let min = seed.clone().map(|s| transform(s, &map)).min().unwrap();
+            println!("min: {}", min);
+            min
+        })
+        .collect::<Vec<i64>>();
+
+    *results.iter().min().unwrap()
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -21,6 +57,27 @@ fn part_1(input: &str) -> i64 {
         .map(|s| s.parse().unwrap())
         .collect();
 
+    let map = create_map(input);
+    let results = seeds
+        .iter()
+        .map(|seed| transform(*seed, &map))
+        .collect::<Vec<i64>>();
+
+    *results.iter().min().unwrap()
+}
+
+#[test]
+fn test() {
+    let input = fs::read_to_string("test.txt").expect("Missing input.txt");
+    let map = create_map(&input);
+    let result = transform(82, &map);
+    assert_eq!(result, 46_i64);
+}
+fn create_map(input: &str) -> HashMap<i64, Vec<Range>> {
+    let mut iter = input.lines().into_iter();
+    iter.next();
+    iter.next();
+
     let mut map: HashMap<i64, Vec<Range>> = HashMap::new();
     let mut map_index = 0_i64;
     while let Some(line) = iter.next() {
@@ -36,12 +93,7 @@ fn part_1(input: &str) -> i64 {
             _ => parse(line, map_index, &mut map),
         };
     }
-    let results = seeds
-        .iter()
-        .map(|seed| transform(*seed, &map))
-        .collect::<Vec<i64>>();
-
-    *results.iter().min().unwrap()
+    map
 }
 
 fn transform(seed: i64, map: &HashMap<i64, Vec<Range>>) -> i64 {
@@ -49,7 +101,7 @@ fn transform(seed: i64, map: &HashMap<i64, Vec<Range>>) -> i64 {
     for i in 0..=6 {
         let ranges = map.get(&i).unwrap();
         for range in ranges {
-            if range.source < result && range.source + range.length > result {
+            if range.source <= result && range.source + range.length > result {
                 // range found
                 result = result + (range.destination - range.source);
                 break;
