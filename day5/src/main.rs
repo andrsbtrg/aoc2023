@@ -107,7 +107,7 @@ fn transform(seed: i64, map: &HashMap<i64, Vec<Range>>) -> i64 {
                 break;
             }
         }
-        // if not found
+        // if not found, no
     }
     result
 }
